@@ -25,12 +25,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      
+      - name: Instalar Yarn
+        run: npm install -g yarn 
 
       - name: Instalar dependências
-        run: npm install
+        run: yarn install
 
       - name: Build do projeto (opcional)
-        run: npm run build
+        run: yarn build
 
       - name: Deploy (placeholder)
         run: echo "Deploy concluído com sucesso!"
