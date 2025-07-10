@@ -104,9 +104,14 @@ resource "aws_s3_object" "static_html" {
   depends_on   = [aws_s3_bucket_policy.allow_read]
 }
 
+variable "ssh_public_key" {
+  description = "SSH Public Key"
+  type        = string
+}
+
 resource "aws_key_pair" "my_kp" {
   key_name   = "sangue-doce-keypair"
-  public_key = file("~/.ssh/id_ed25519.pub")
+  public_key = var.ssh_public_key
 }
 
 resource "aws_security_group" "my_sg" {
