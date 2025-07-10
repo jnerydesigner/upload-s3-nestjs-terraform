@@ -26,6 +26,13 @@ jobs:
       - name: Deploy (placeholder)
         run: echo "Deploy concluído com sucesso!"
 
+      # --- Docker Build & Push ---
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
         # ---- Terraform ----
       - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v3
