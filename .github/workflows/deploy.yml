@@ -2,7 +2,7 @@ name: Deploy Node.js Backend
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
   build-and-deploy:
@@ -20,11 +20,16 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
-      - name: Rodar testes (opcional, se tiver)
-        run: npm test
-
       - name: Build do projeto (opcional)
         run: npm run build
 
       - name: Deploy (placeholder)
         run: echo "Deploy concluído com sucesso!"
+
+        # ---- Terraform ----
+      - name: Instalar Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Inicializar Terraform
+        working-directory: ./infra
+        run: terraform init
