@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { S3ConfigService } from './s3.config';
 import { randomUUID } from 'node:crypto';
+import { env } from '@app/constants/env';
 
 @Injectable()
 export class S3UploadService {
@@ -28,8 +29,8 @@ export class S3UploadService {
     this.s3Client = new S3Client({
       region,
       credentials: {
-        accessKeyId,
-        secretAccessKey,
+        accessKeyId: env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
       },
     });
   }
