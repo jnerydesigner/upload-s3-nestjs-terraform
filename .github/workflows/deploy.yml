@@ -55,21 +55,21 @@ jobs:
       - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Inicializar Terraform
-        working-directory: ./infra
-        run: terraform init
+      # - name: Inicializar Terraform
+      #   working-directory: ./infra
+      #   run: terraform init
 
       - name: Validar Terraform
         working-directory: ./infra
         run: terraform validate
 
-      - name: Aplicar Terraform
-        working-directory: ./infra
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-1
-        run: terraform apply -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+      # - name: Aplicar Terraform
+      #   working-directory: ./infra
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_REGION: us-east-1
+      #   run: terraform apply -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
 
       # - name: Destroy Terraform
       #   working-directory: ./infra
@@ -81,3 +81,5 @@ jobs:
 
       - name: Deploy Backend (placeholder)
         run: echo "Deploy do backend concluído!"
+      - name: Terraform Deploy (placeholder)
+        run: echo "Terraform Deploy do backend concluído!"
