@@ -1,0 +1,31 @@
+name: Destroy Infra
+
+on:
+  push:
+    branches:
+      - infra-destroy
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.2
+
+      - name: Initialize Terraform
+        working-directory: ./infra
+        run: terraform init
+
+      - name: Destroy Terraform
+        working-directory: ./infra
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+        run: terraform destroy -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
