@@ -51,7 +51,7 @@ jobs:
       - name: Push da imagem para Docker Hub
         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{env.APP_NAME}}:latest
 
-        # ---- Terraform ----
+      # ---- Terraform ----
       - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -62,6 +62,10 @@ jobs:
       - name: Validar Terraform
         working-directory: ./infra
         run: terraform validate
+
+      - name: Planejar Infra Terraform
+        working-directory: ./infra
+        run: terraform plan  -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
 
       - name: Aplicar Terraform
         working-directory: ./infra
@@ -81,3 +85,5 @@ jobs:
 
       - name: Deploy Backend (placeholder)
         run: echo "Deploy do backend concluído!"
+      - name: Terraform Deploy (placeholder)
+        run: echo "Terraform Deploy do backend concluído!"
