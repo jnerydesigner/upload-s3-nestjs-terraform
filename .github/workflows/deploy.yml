@@ -75,13 +75,13 @@ jobs:
           AWS_REGION: us-east-1
         run: terraform apply -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
 
-      - name: Destroy Terraform
-        working-directory: ./infra
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-1
-        run: terraform destroy -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+      # - name: Destroy Terraform
+      #   working-directory: ./infra
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_REGION: us-east-1
+      #   run: terraform destroy -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
 
       - name: Deploy Backend (placeholder)
         run: echo "Deploy do backend concluído!"
