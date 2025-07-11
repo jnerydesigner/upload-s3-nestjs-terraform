@@ -5,6 +5,15 @@ on:
     branches:
       - infra-destroy
 
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+  SSL_KEY: ${{ secrets.SSL_KEY }}
+  SSL_CERT: ${{ secrets.SSL_CERT }}
+  APP_NAME: 'upload-s3-nodejs'
+
 jobs:
   destroy:
     runs-on: ubuntu-latest
