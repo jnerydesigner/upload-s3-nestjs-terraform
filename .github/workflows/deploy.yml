@@ -63,6 +63,10 @@ jobs:
         working-directory: ./infra
         run: terraform validate
 
+      - name: Planejar Infra Terraform
+        working-directory: ./infra
+        run: terraform plan
+
       # - name: Aplicar Terraform
       #   working-directory: ./infra
       #   env:
