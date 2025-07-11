@@ -55,9 +55,9 @@ jobs:
       - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # - name: Inicializar Terraform
-      #   working-directory: ./infra
-      #   run: terraform init
+      - name: Inicializar Terraform
+        working-directory: ./infra
+        run: terraform init
 
       - name: Validar Terraform
         working-directory: ./infra

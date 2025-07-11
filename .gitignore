@@ -60,7 +60,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 ./logs/*
 
-
 # # infra
 infra/.terraform/
 infra/*.tfstate
