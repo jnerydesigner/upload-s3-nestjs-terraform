@@ -14,8 +14,30 @@ env:
   APP_NAME: 'upload-s3-nodejs'
 
 jobs:
+  detect-merge-source:
+    runs-on: ubuntu-latest
+    outputs:
+      skip_deploy: ${{ steps.check.outputs.skip_deploy }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detectar branch de origem do merge
+        id: check
+        run: |
+          MERGE_SOURCE=$(git log -1 --pretty=%B | grep -i 'merge branch' | awk '{print $3}' | tr -d "'")
+          echo "Branch de origem do merge: $MERGE_SOURCE"
+          if [[ "$MERGE_SOURCE" == "infra-destroy" ]]; then
+            echo "🚫 Skip deploy"
+            echo "skip_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Proceed with deploy"
+            echo "skip_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
   build-and-deploy:
     runs-on: ubuntu-latest
+    needs: detect-merge-source
+    if: needs.detect-merge-source.outputs.skip_deploy == 'false'
 
     steps:
       - name: Checkout do código
