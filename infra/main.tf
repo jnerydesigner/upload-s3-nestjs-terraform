@@ -116,7 +116,7 @@ resource "aws_s3_object" "static_html" {
   key          = "index.html"
   content_type = "text/html"
   source       = "${path.module}/index.html"
-  etag         = filemd5("${path.module}/index.html")
+  source_hash  = filemd5("${path.module}/index.html")
 
   depends_on = [aws_s3_bucket_policy.allow_read]
 }
