@@ -5,9 +5,7 @@ terraform {
       version = "5.54.1"
     }
   }
-}
 
-terraform {
   backend "s3" {
     bucket  = "terraform-state-seligadev"
     key     = "terraform.tfstate"
@@ -24,6 +22,7 @@ resource "aws_vpc" "my_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
+
   tags = {
     Name = "sangue-doce-vpc"
   }
@@ -34,6 +33,7 @@ resource "aws_subnet" "my_subnet" {
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
+
   tags = {
     Name = "sangue-doce-subnet-public"
   }
@@ -41,6 +41,7 @@ resource "aws_subnet" "my_subnet" {
 
 resource "aws_internet_gateway" "my_igw" {
   vpc_id = aws_vpc.my_vpc.id
+
   tags = {
     Name = "sangue-doce-igw"
   }
@@ -48,10 +49,12 @@ resource "aws_internet_gateway" "my_igw" {
 
 resource "aws_route_table" "my_route_table" {
   vpc_id = aws_vpc.my_vpc.id
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.my_igw.id
   }
+
   tags = {
     Name = "sangue-doce-route-table"
   }
@@ -64,6 +67,7 @@ resource "aws_route_table_association" "my_subnet_association" {
 
 resource "aws_s3_bucket" "my_bucket" {
   bucket = "s3-nest-upload"
+
   tags = {
     Name        = "s3-nest-upload"
     Environment = "Production"
@@ -72,6 +76,7 @@ resource "aws_s3_bucket" "my_bucket" {
 
 resource "aws_s3_bucket_versioning" "versioning" {
   bucket = aws_s3_bucket.my_bucket.id
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -83,12 +88,13 @@ resource "aws_s3_bucket_public_access_block" "disable_block" {
   block_public_policy     = false
   ignore_public_acls      = false
   restrict_public_buckets = false
-  depends_on              = [aws_s3_bucket.my_bucket]
-}
 
+  depends_on = [aws_s3_bucket.my_bucket]
+}
 
 resource "aws_s3_bucket_policy" "allow_read" {
   bucket = aws_s3_bucket.my_bucket.id
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -101,6 +107,7 @@ resource "aws_s3_bucket_policy" "allow_read" {
       }
     ]
   })
+
   depends_on = [aws_s3_bucket_public_access_block.disable_block]
 }
 
@@ -110,7 +117,8 @@ resource "aws_s3_object" "static_html" {
   content_type = "text/html"
   source       = "${path.module}/index.html"
   etag         = filemd5("${path.module}/index.html")
-  depends_on   = [aws_s3_bucket_policy.allow_read]
+
+  depends_on = [aws_s3_bucket_policy.allow_read]
 }
 
 variable "ssh_public_key" {
@@ -165,6 +173,69 @@ resource "aws_security_group" "my_sg" {
   }
 }
 
+resource "aws_iam_role" "ec2_ssm_role" {
+  name = "ec2-ssm-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+data "aws_caller_identity" "current" {}
+
+resource "aws_iam_policy" "ec2_ssm_s3_policy" {
+  name        = "ec2-ssm-s3-policy"
+  description = "Permite EC2 acessar Parameter Store e bucket S3"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ]
+        Resource = "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/seligadev/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.my_bucket.arn,
+          "${aws_s3_bucket.my_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_managed" {
+  role       = aws_iam_role.ec2_ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "attach_ssm_s3_policy" {
+  role       = aws_iam_role.ec2_ssm_role.name
+  policy_arn = aws_iam_policy.ec2_ssm_s3_policy.arn
+}
+
+resource "aws_iam_instance_profile" "ec2_ssm_profile" {
+  name = "ec2-ssm-profile"
+  role = aws_iam_role.ec2_ssm_role.name
+}
+
 resource "aws_instance" "my_server" {
   ami                    = "ami-05ffe3c48a9991133"
   instance_type          = "t2.nano"
@@ -172,12 +243,18 @@ resource "aws_instance" "my_server" {
   vpc_security_group_ids = [aws_security_group.my_sg.id]
   user_data              = file("${path.module}/user_data.sh")
   key_name               = aws_key_pair.my_kp.key_name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_ssm_profile.name
 
   tags = {
     Name        = "sangue-doce-server"
     Environment = "Production"
   }
-  depends_on = [aws_security_group.my_sg, aws_subnet.my_subnet, aws_internet_gateway.my_igw]
+
+  depends_on = [
+    aws_security_group.my_sg,
+    aws_subnet.my_subnet,
+    aws_internet_gateway.my_igw
+  ]
 }
 
 output "s3_bucket_name" {

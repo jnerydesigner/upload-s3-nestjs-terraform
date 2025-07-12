@@ -69,7 +69,7 @@
             formData.append('file', file);
 
             try {
-                const response = await fetch('https://34.200.250.224:3377/api/upload', {
+                const response = await fetch('https://13.218.180.236:3388/upload', {
                     method: 'POST',
                     body: formData
                 });
@@ -82,7 +82,7 @@
 
                 console.log("FormDataUpload", data);
                 responseMessage.textContent = 'Imagem enviada com sucesso!';
-                previewS3.src = data.urlFile;
+                previewS3.src = data.url;
                 previewS3.classList.remove('hidden');
             } catch (error) {
                 console.error(error);
