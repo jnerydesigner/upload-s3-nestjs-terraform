@@ -1,1 +1,1 @@
-destroy=1
+destroy=2
